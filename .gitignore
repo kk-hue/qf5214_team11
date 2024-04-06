@@ -265,5 +265,9 @@ ENV/
 .vscode/
 .idea/
 
-/notebooks
-/data
+# Project directories and files
+tests
+notebooks
+outputs
+*/.DS_Store
+.DS_Store
