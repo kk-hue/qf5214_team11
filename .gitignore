@@ -264,3 +264,10 @@ ENV/
 # IDE settings
 .vscode/
 .idea/
+
+# Project directories and files
+tests
+notebooks
+outputs
+*/.DS_Store
+.DS_Store
