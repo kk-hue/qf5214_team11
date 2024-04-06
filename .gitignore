@@ -264,3 +264,6 @@ ENV/
 # IDE settings
 .vscode/
 .idea/
+
+/notebooks
+/data
