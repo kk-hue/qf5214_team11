@@ -16,4 +16,4 @@ for ticker in tqdm(us_stock_list[5001:]):
     total_df = pd.concat([total_df, ts_df], ignore_index=True)
 print(total_df)
 total_df.columns = ['datetime', 'open', 'close', 'high', 'low', 'volume', 'volume(price)', 'last_price', 'ticker']
-total_df.to_csv('us_stock_20240401_20240406_2.csv')
+total_df.to_csv('us_stock_20240401_20240406.csv')
