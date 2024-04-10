@@ -1,3 +1,7 @@
+"""Configuration file.
+
+"""
+
 # Database (MySQL/MariaDB) properties
 mysql_user = 'root'
 mysql_password = 'hty00315'
