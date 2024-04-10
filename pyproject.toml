@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "qf5214-team11"
+version = "0.1.0"
+description = ""
+authors = ["kk-hue <70795164+kk-hue@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "qf5214_team11"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+mysql-connector = "^2.2.9"
+mysql-connector-python = "^8.3.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
