@@ -43,13 +43,13 @@ class GetData:
             if function == 'INTRADAY':
                 previous_timestamp = (timestamp - datetime.timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M:%S")
                 df = ak.stock_us_hist_min_em(symbol, start_date=previous_timestamp, end_date=previous_timestamp)
-                df.columns = ['datetime', 'open', 'close', 'high', 'low', 'volume', 'volume(price)', 'latest_px']
+                df.columns = ['datetime', 'open', 'close', 'high', 'low', 'volume', 'volume_price', 'latest_px']
                 return df.iloc[0]
             elif function == 'INTRADAY_100':
                 back100_ts = (timestamp - datetime.timedelta(minutes=100)).strftime("%Y-%m-%d %H:%M:%S")
                 back1_ts = (timestamp - datetime.timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M:%S")
                 df = ak.stock_us_hist_min_em(symbol, start_date=back100_ts, end_date=back1_ts)
-                df.columns = ['datetime', 'open', 'close', 'high', 'low', 'volume', 'volume(price)', 'latest_px']
+                df.columns = ['datetime', 'open', 'close', 'high', 'low', 'volume', 'volume_price', 'latest_px']
                 return df
             elif function == 'HIST_100':
                 df = ak.stock_us_hist(symbol, end_date=timestamp.strftime("%Y-%m-%d %H:%M:%S"), period=interval)

@@ -1,5 +1,6 @@
 from newsapi import NewsApiClient
 import datetime
+import json
 
 
 def get_news(timestamp):
@@ -36,8 +37,12 @@ def get_news(timestamp):
 
 
 if __name__ == '__main__':
-    example_timestamp = datetime.datetime(2024, 4, 5, 15, 30)
+    example_timestamp = datetime.datetime(2024, 4, 8, 18, 20)
 
     # give you an example of how to query news by giving certain timestamp
     has_news, articles = get_news(example_timestamp)
     print(has_news, articles)
+    with open('F:/qf5214_team11/Data/news.jsonl', 'w') as f:
+        for item in articles:
+            f.write(json.dumps(item) + '\n')
+
