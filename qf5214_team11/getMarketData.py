@@ -37,8 +37,10 @@ class GetData:
             Time interval between two consecutive data points in the time series. Only applicable
             for HIST_100. For example: daily, weekly, monthly
         timestamp: datetime.datetime()
-            Timestamp of real-time data (UTC+8).
+            Timestamp of real-time data (UTC).
         """
+
+        timestamp = timestamp + datetime.timedelta(hours=8)
         try:
             if function == 'INTRADAY':
                 previous_timestamp = (timestamp - datetime.timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M:%S")
@@ -67,8 +69,8 @@ class GetData:
 
 if __name__ == '__main__':
     # Here I provide some examples
-    example_ts = datetime.datetime(2024, 4, 1, 23, 38)
-    example_symbol = '105.TSLA'
+    example_ts = datetime.datetime(2024, 4, 3, 13, 38)
+    example_symbol = '105.ALLR'
 
     # 1. INTRADAY: give a timestamp and symbol, return a data point
     df1 = GetData().get_akshare_data(timestamp=example_ts, symbol=example_symbol, function='INTRADAY')
@@ -86,7 +88,14 @@ if __name__ == '__main__':
     df4 = GetData().get_akshare_data(timestamp=example_ts, symbol=example_symbol, function='ALL_HIST', interval='monthly')
     print(df4)
 
+    # get stock list from spot price
+    us_spot = ak.stock_us_spot_em()
+    us_stock_list = us_spot['代码'].unique()
 
-
-
+    # Example: query multiple stocks' historical min bar
+    count = 0
+    for ticker in us_stock_list[:10]:
+        GetData().get_akshare_data(timestamp=datetime.datetime(2024, 4, 9, 13, 32), function='INTRADAY', symbol=ticker)
+        count += 1
+        print(count)
 
