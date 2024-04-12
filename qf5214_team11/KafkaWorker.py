@@ -93,7 +93,7 @@ class KafkaWorker:
                                        value=news_ts_df.to_json(orient='records', date_format='iso'))
                     print(f"Produced data to topic {self.KAFKA_TOPIC2}")
 
-                time_module.sleep(10)  # Sleep for 1 minute as we are dealing with minute bar data
+                time_module.sleep(15)  # Sleep for 1 minute as we are dealing with minute bar data
 
                 # Increment minute
                 ts += timedelta(minutes=1)

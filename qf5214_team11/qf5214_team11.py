@@ -15,6 +15,13 @@ if __name__ == '__main__':
     # Initialise Kafka worker
     worker = KafkaWorker('2024-04-06 00:00:00', market_data_path, news_data_path)
     worker.start()
+
+    # Insert PySpark, DB, BI logic below
+    # ...
+    
+    # Create DB    
+    # create_database(mysql_user, mysql_password, mysql_hostname, mysql_database_name, mysql_table_name)
+    
     try:
         while True:
             # Just to keep the main thread running
@@ -25,5 +32,4 @@ if __name__ == '__main__':
         print('Stopping Kafka Worker.')
         worker.stop()
 
-    # Create DB    
-    # create_database(mysql_user, mysql_password, mysql_hostname, mysql_database_name, mysql_table_name)
+    
