@@ -6,6 +6,9 @@ import time as time_module
 import pandas as pd
 from datetime import datetime, time, timedelta
 from threading import Thread, Event
+# import mysql.connector
+# from mysql.connector import Error
+from sqlalchemy import create_engine
 
 
 def _validate_timestamp_format(timestamp):
@@ -17,6 +20,25 @@ def _validate_timestamp_format(timestamp):
     except ValueError:
         return False
 
+# Helper functions to talk to DB directly
+def create_server_connection(host_name, port_num, user_name, user_password, db_name):
+    connection = mysql.connector.connect(
+                 host=host_name,
+                 port=port_num,
+                 user=user_name,
+                 passwd=user_password,
+                 database=db_name
+    )
+    print("MySQL Database connection successful")
+
+    return connection
+
+def execute_query(connection, query, data):
+    cursor = connection.cursor()
+    cursor.execute(query, data)
+    connection.commit()
+
+    print("Query successful")
 
 class KafkaWorker:
     KAFKA_BOOTSTRAP_SERVERS = 'localhost:9092'
@@ -52,6 +74,12 @@ class KafkaWorker:
                                         value_deserializer=lambda x: json.loads(x.decode('utf-8')),
                                         api_version=(0, 10, 1)
         )
+        # Database configs
+        self.DB_HOST = 'localhost'
+        self.DB_PORT = '3306'
+        self.DB_USER = 'root'
+        self.DB_PW = 'frank9802'
+        self.DB_NAME = 'qf5214'
 
         # Threads
         self.producer_thread = Thread(target=self.run_producer)
@@ -103,6 +131,18 @@ class KafkaWorker:
 
     def run_consumer(self):
 
+        # Connect to MySQL
+        # db_connection = create_server_connection(self.DB_HOST, self.DB_PORT, self.DB_USER, self.DB_PW, self.DB_NAME)
+        # Create a connection string
+        connection_string = ('mysql+mysqlconnector://'
+                            f'{self.DB_USER}:{self.DB_PW}'
+                            f'@{self.DB_HOST}:{self.DB_PORT}'
+                            f'/{self.DB_NAME}'
+                            )
+
+        # Establish a connection to the MySQL database
+        engine = create_engine(connection_string)
+
         while True:
 
             message = self.consumer.poll(timeout_ms=10000)  # Adjust timeout as needed
@@ -118,10 +158,42 @@ class KafkaWorker:
                     print(f"Consumed data from topic {self.KAFKA_TOPIC1}")
                     display(market_ts_data)
 
+                    # Insert minute market data to database
+                    # Timestamp,Open,Close,High,Low,Volume,Volume(Dollar),Last Price,Ticker
+                    # db_query = """
+                    #            INSERT INTO market_data (Timestamp, Open, Close, High, Low, Volume, Volume_Dollar, Last_Price, Ticker) 
+                    #            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+                    #            """
+                    # execute_query(db_connection, db_query, (market_ts_data['Timestamp'], 
+                    #                                         market_ts_data['Open'],
+                    #                                         market_ts_data['Close'],
+                    #                                         market_ts_data['High'],
+                    #                                         market_ts_data['Low'],
+                    #                                         market_ts_data['Volume'],
+                    #                                         market_ts_data['Volume(Dollar)'],
+                    #                                         market_ts_data['Last Price'],
+                    #                                         market_ts_data['Ticker']) )
+
+                    # Rename two columns to be compatible with database naming
+                    market_ts_data.rename(columns={'Volume(Dollar)': 'Volume_Dollar', 'Last Price': 'Last_Price'}, inplace=True)
+                    # Insert the data into the database as a df at one go
+                    market_ts_data.to_sql('market_data', con=engine, if_exists='append', index=False)
+
+
                 if tp.topic == self.KAFKA_TOPIC2: # news data
                     news_ts_data = pd.read_json(StringIO(records[0].value), orient='records')
                     print(f"Consumed data from topic {self.KAFKA_TOPIC2}")
                     display(news_ts_data)
+
+                    # Insert minute news data (if any) to database
+                    # publishedAt,stock_queried,source_id,title,description,content
+                    # db_query = """
+                    #            INSERT INTO news_data (publishedAt, stock_queried, source_id, title, description, content)
+                    #            VALUES (%s, %s, %s, %s, %s, %s)
+                    #            """
+                    # execute_query(db_connection, db_query, (news_ts_data['id'], 
+                    #                                         news_ts_data['title'],
+                    #                                         news_ts_data['content']) )
 
         # === IF CONSUMER WAS WRITTEN WITH THE BELOW FOR MESSAGE-LOOP IT CANNOT SHUT DOWN GRACEFULLY ===
         # while not self.stop_event.is_set():
