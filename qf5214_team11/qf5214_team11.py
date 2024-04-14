@@ -26,4 +26,4 @@ if __name__ == '__main__':
         worker.stop()
 
     # Create DB    
-    # create_database(mysql_user, mysql_password, mysql_hostname, mysql_database_name, mysql_table_name)
+    create_database(mysql_user, mysql_password, mysql_hostname, mysql_database_name, mysql_table_name)

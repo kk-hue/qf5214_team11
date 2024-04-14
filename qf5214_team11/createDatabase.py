@@ -1,6 +1,8 @@
+import pandas as pd
 import mysql.connector
 from mysql.connector import errorcode
 # from config import mysql_user, mysql_password, mysql_hostname, mysql_database_name, mysql_table_name
+
 
 def create_database(mysql_user: str, 
                     mysql_password: str,
@@ -34,4 +36,3 @@ def create_database(mysql_user: str,
 
         main_statement = "CREATE TABLE IF NOT EXISTS " + mysql_table_name + "(ID MEDIUMINT KEY AUTO_INCREMENT" + stock_statement + ");"
         cursor.execute(main_statement)
-
