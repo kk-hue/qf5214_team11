@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
     # Example: query multiple stocks' historical min bar
     count = 0
-    for ticker in us_stock_list[:10]:
+    for ticker in us_stock_list[:1000]:
         GetData().get_akshare_data(timestamp=datetime.datetime(2024, 4, 9, 13, 32), function='INTRADAY', symbol=ticker)
         count += 1
         print(count)
