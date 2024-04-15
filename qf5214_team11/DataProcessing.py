@@ -84,8 +84,13 @@ def data_preprocess(news_data: pd.DataFrame,
         news_data.rename({'publishedAt': "Timestamp"}, inplace=True, axis='columns')
 
         all_data = pd.merge(market_data, news_data, how="outer", on=["stock_queried", "Timestamp"])
-
-        all_data.to_csv(output_dir, index = False)
+        all_data.rename({'Volume(Dollar)': "Volume_Dollar",
+                            'Last Price': 'Last_Price'}, inplace=True, axis='columns')
+        output_df = all_data[['Timestamp', 'Open', 'Close', 'High', 'Low', 'Volume',
+                          'Volume_Dollar', 'Last_Price', 'Ticker', 'stock_queried', 'score']]
+        output_df = output_df[output_df['score'] != '{\n    "Sentiment": 3.7\n}']
+        output_df['score'] = output_df['score'].astype(float)
+        output_df.to_csv(output_dir, index = False)
 
 if __name__ == '__main__':
      data_preprocess(news_data, market_data, './Data/merged_data.csv')

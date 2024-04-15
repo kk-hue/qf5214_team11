@@ -1,17 +1,32 @@
 import pandas as pd
 import mysql.connector
 from mysql.connector import errorcode
-# from config import mysql_user, mysql_password, mysql_hostname, mysql_database_name, mysql_table_name
+from sqlalchemy import create_engine
+from config import mysql_user, mysql_password, mysql_hostname, mysql_database_name, mysql_table_name, mysql_port
 
+'''
+Make sure you have 'merged_data.csv' in the data folder first,
+Otherwise please see DataProcessing.py. Please make sure you have
+mysql and your local host is running, my sql workbench is also recommanded 
+for visualising database. Using command line to run 
+'poetry run python ./qf5214_team11/createDatabase.py',
+this script will be create the data schema and perform
+data ingestion from datafram to mysql database.
+'''
+
+df = pd.read_csv('./Data/merged_data.csv')
 
 def create_database(mysql_user: str, 
                     mysql_password: str,
                     mysql_hostname: str, 
                     mysql_database_name: str, 
-                    mysql_table_name: str):
-    
+                    mysql_table_name: str,
+                    mysql_port: str):
         try:
-            cnx = mysql.connector.connect(host= mysql_hostname, user = mysql_user, password=mysql_password)
+            cnx = mysql.connector.connect(host=mysql_hostname, 
+                                          user=mysql_user, 
+                                          password=mysql_password,
+                                          auth_plugin= 'mysql_native_password')
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("User name or password incorrect")
@@ -19,8 +34,8 @@ def create_database(mysql_user: str,
                 print(err)
             # Close connection
             cnx.close()
-            print('Connection closed')
-
+            print('Connection closed') 
+         
         # Instantiate cursor object
         cursor = cnx.cursor()
 
@@ -30,9 +45,22 @@ def create_database(mysql_user: str,
         # Use given database
         cursor.execute("USE {}".format(mysql_database_name))
 
-        stock_statement = ", 1_datetime FLOAT(6,2) NOT NULL, 2_open FLOAT(6,2) NOT NULL, 3_close FLOAT(6,2) NOT NULL,  4_high FLOAT(6,2) NOT NULL"\
-            ", 5_low FLOAT(6,2) NOT NULL, 6_volume INT NOT NULL, 7_volume_price FLOAT(6,2) NOT NULL, 8_last_price FLOAT(6,2) NOT NULL"\
-            ", 9_news_sentiment_score FLOAT(6,2) NOT NULL"
-
-        main_statement = "CREATE TABLE IF NOT EXISTS " + mysql_table_name + "(ID MEDIUMINT KEY AUTO_INCREMENT" + stock_statement + ");"
+        merge_statement = ", Timestamp TIMESTAMP NOT NULL, Open FLOAT(6,2), Close FLOAT(6,2),  High FLOAT(6,2)"\
+            ", Low FLOAT(6,2) , Volume INT, Volume_Dollar FLOAT(6,2), Last_Price FLOAT(6,3)"\
+            ", Ticker CHAR, stock_queried CHAR NOT NULL, score FLOAT(6,2)"\
+        
+        main_statement = "CREATE TABLE IF NOT EXISTS " + mysql_table_name + "(ID MEDIUMINT KEY AUTO_INCREMENT" + merge_statement  + ");"
         cursor.execute(main_statement)
+        
+        # Create a connection string
+        connection_string = f'mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_hostname}:{mysql_port}/{mysql_database_name}'
+        # Establish a connection to the MySQL database
+        engine = create_engine(connection_string)
+
+        try:
+            df.to_sql(name=mysql_table_name, con=engine, if_exists='replace', index=False)
+        except Exception as e:
+            print("Error:", e)
+
+if __name__ == '__main__':
+     create_database(mysql_user, mysql_password, mysql_hostname, mysql_database_name, mysql_table_name, mysql_port)
